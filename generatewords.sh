@@ -2,8 +2,8 @@
 
 MAXCOUNT=10
 count=1
-DICTIONARY_INPUT="/home/lamr/twitchinterview/words_short"
-#DICTIONARY_INPUT="/usr/share/dict/words"
+#DICTIONARY_INPUT="/home/lamr/twitchinterview/words_short"
+DICTIONARY_INPUT="/usr/share/dict/words"
 
 while [ "$count" -le $MAXCOUNT ]; do
 	rand_word=$(shuf -n 1 $DICTIONARY_INPUT)

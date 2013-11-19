@@ -2,24 +2,6 @@
 
 # Author - Roger Lam, mrlamroger@ucla.edu
 
-# Note: 
-# - In hindsight, it would be much better to implement in Python.
-# - Hacking together a queue and set with arrays and associative arrays
-#+caused many hiccups and is a potential source of bugs.
-# - Bash also does not deal well with functions and passing by reference.
-# - Ideally, I would have getting all possible duplicate permutations as
-#+one method and getting all possible vowel combinations as a second method.
-# - To test, run bash generatewords.sh | bash spellcheck.sh | grep "NO SUGGESTIONS" 
-# - By default, generatewords.sh and spellcheck.sh use the first 25 words from
-#+/usr/share/dict/words in the file word_short
-# - Uncomment the DICTIONARY_INPUT variable in both files to use the entire dict
-
-
-# Known issues:
-# - Permutation of vowels may create duplicate outcome due to the nature
-#+of the algorithm. May take additional runtime.
-# - BASH is not the ideal language to code this problem in. 
-
 # Overview:
 # - This loads the word, sanitizes it, and finds all possible permutations
 #+according to the classes of spelling mistakes (Case, repeated letters,
@@ -30,18 +12,6 @@
 # - For each reduction, we find all possible permutations when 
 #+replacing vowels with another vowel (a, e, i, o, u)
 
-# Runtime analysis:
-# - Let m be the length and v be the number of vowels and d be the number of
-#+duplicates in the input word
-# - Sanitization take O(m) to iterate through all the letters once
-# - Reduction of duplicate letters take O(2^d + (m-1)) = O(2^d) since each
-#+duplicate creates an additional word to continue searching through.
-# - For each of the duplicate words, Replacement of vowels takes O(5^v + m) = 
-#+O(5^v) since each vowel creates an addition four words to continue 
-#+searching though.
-# - Total runtime: O(2^d * 5^v)
-
-
 # Loading Dictionary:
 # - Load words into an associative array (hash table).
 # - One time cost of loading words in. 
@@ -49,17 +19,13 @@
 # - Searching: Average and amortized O(1), worst case O(N) when all words 
 #+are placed in the same bucket.
 
-toLower () {
-    echo $(echo $1 | tr '[:upper:]' '[:lower:]')
-}
-
-DICTIONARY_INPUT="/home/lamr/twitchinterview/words_short"
-#DICTIONARY_INPUT="/usr/share/dict/words"
+#DICTIONARY_INPUT="/home/lamr/twitchinterview/words_short"
+DICTIONARY_INPUT="/usr/share/dict/words"
 
 declare -A DICTIONARY
 
 while read word; do
-    word=$(toLower $word)
+    word=${word,,}
     DICTIONARY[$word]=1
 done < $DICTIONARY_INPUT
 
@@ -67,20 +33,9 @@ done < $DICTIONARY_INPUT
 #    echo "$j"
 #done
 
-# Could not debug... 
-#inDictionary () {
-#    x=$1
-#    if [[ ${DICTIONARY[$x]} ]]; then
-#        echo "0"       
-#    else
-#        echo "1"
-#    fi
-#}
-
-
 while read -p"> " input_word; do
     #echo "You entered $input_word"
-    input_word=$(toLower $input_word)
+    input_word=${input_word,,}
     #echo "Lowercased: $input_word"
     
     found=false
@@ -102,7 +57,7 @@ while read -p"> " input_word; do
                 if [[ ${DUPLICATE:$i:1} == ${DUPLICATE:$i+1:1} ]]; then
                     twochars=${DUPLICATE:$i:2}
                     #echo $twochars
-                    removed_dup=$(echo $DUPLICATE | sed "s/.//$((++i))")
+                    removed_dup=${DUPLICATE:0:$i}${DUPLICATE:$((i+1))}
                     #echo $removed_dup
                     ALL_DUPLICATE[$removed_dup]=$removed_dup
                     if [[ ${DICTIONARY[$removed_dup]} ]]; then
@@ -140,11 +95,11 @@ while read -p"> " input_word; do
                         if [[ ${k:$i:1} == [aeiou] ]]; then
                             
                             
-                            change_a=$(echo $k | sed "s/./a/$((++i))")
-                            change_e=$(echo $k | sed "s/./e/$((++i))")
-                            change_i=$(echo $k | sed "s/./i/$((++i))")
-                            change_o=$(echo $k | sed "s/./o/$((++i))")
-                            change_u=$(echo $k | sed "s/./u/$((++i))")
+                            change_a=${k:0:$i}a${k:$((i+1))}
+                            change_e=${k:0:$i}e${k:$((i+1))}                            
+                            change_i=${k:0:$i}i${k:$((i+1))}
+                            change_o=${k:0:$i}o${k:$((i+1))}
+                            change_u=${k:0:$i}u${k:$((i+1))}
 
                             #echo $change_a
                             #echo $change_e
